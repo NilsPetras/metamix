@@ -13,7 +13,14 @@
 #'   .95 corresponds to a 95% CI
 #' @param TwoSided is the t-test two-sided?
 #' @param SigSuppress if both significant and non-significant study results
-#'   entered the meta-analysis, were significant results suppressed?
+#'   entered the meta-analysis, were significant results suppressed? Currently
+#'   only works for one-sided t-tests.
+#' @param goodness should a goodness of fit test of the model to the
+#'   t-distribution be performed?
+#' @param nrep number of repetitions in the bootstrapping procedure of the
+#'   goodness of fit test
+#' @param seed random number generation seed for reproducibility
+#'
 #'
 #' @return
 #' @export
@@ -27,8 +34,12 @@ metamix <- function(
     alpha = .05,
     ConCof = .95,
     TwoSided = FALSE,
-    SigSuppress = FALSE) {
+    SigSuppress = FALSE,
+    goodness = TRUE,
+    nrep = 1e5,
+    seed = 42) {
 
+  set.seed(seed)
   if (SigOnly | nonSigOnly) {
     y <- EstimationSigOnly(
       t = t,
@@ -47,9 +58,43 @@ metamix <- function(
       SigSuppress = SigSuppress,
       TwoSided = TwoSided
     )
+    
+    fit <- tFit(
+      t = t,
+      n1 = n1,
+      n2 = n2,
+      alpha = alpha,
+      p = min(y$p_est, 1),
+      d = y$d_est,
+      nrep = nrep,
+      TwoSided = TwoSided,
+      SigSuppress = SigSuppress
+    )
   }
 
-  return(y)
+  output <- list(
+    data = list(
+      t = t,
+      n1 = n1,
+      n2 = n2
+    ),
+    model = list(
+      SigOnly = SigOnly,
+      nonSigOnly = nonSigOnly,
+      alpha = alpha,
+      TwoSided = TwoSided,
+      SigSuppress = SigSuppress),
+    estimates = y,
+    model_fit_test = fit[[1]],
+    theoretical_distribution = list(
+      t_values = fit[[2]],
+      published = fit[[3]]
+    )
+  )
+  
+  class(output) <- c("metamix", class(output))
+  
+  return(output)
 }
 
 EstimationSigOnly <- function(
