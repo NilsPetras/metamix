@@ -4,11 +4,13 @@ Title: Correct meta-analytic effect estimates for publication bias
 Version: 0.1.0
 Authors@R: c(
     person("Nils", "Petras", email = "nils.petras@mailbox.org",
-    role = c("aut", "cre")))
+    role = c("aut", "cre")),
+    person("Daniel", "Heck", role = c("aut")))
 Maintainer: Nils Petras <nils.petras@mailbox.org>
-Description: The code of this package is an adaptation of the supplement of Ulrich, R., Miller, J., & Erdfelder, E. (2018). Effect size estimation from t-statistics in the presence of publication bias. Zeitschrift für Psychologie.
+Description: Use mixture models to correct meta-analytical effect size estimates of t-tests for selectiv publishing. This is an adaptation and extension of the code supplement to Ulrich, R., Miller, J., & Erdfelder, E. (2018). Effect size estimation from t-statistics in the presence of publication bias. Zeitschrift für Psychologie.
 Depends: R (>= 4.0.0)
+Imports: stats, ggplot2, methods
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
