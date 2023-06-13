@@ -13,7 +13,9 @@ metamix(
   alpha = 0.05,
   ConCof = 0.95,
   TwoSided = FALSE,
-  SigSuppress = FALSE
+  SigSuppress = FALSE,
+  nrep = 1e+05,
+  seed = 42
 )
 }
 \arguments{
@@ -31,13 +33,47 @@ meta-analysis?}
 \item{alpha}{significance level (if one-sided: right tale)}
 
 \item{ConCof}{confidence coefficient for calculating the confidence interval;
-.95 corresponds to a 95% CI}
+.95 corresponds to a 95\% CI}
 
-\item{TwoSided}{is the t-test two-sided?}
+\item{TwoSided}{were the observed t-tests two-sided? Currently not supported
+for non-mixture models.}
 
 \item{SigSuppress}{if both significant and non-significant study results
-entered the meta-analysis, were significant results suppressed?}
+entered the meta-analysis, were significant results suppressed? Currently
+only works for one-sided t-tests.}
+
+\item{nrep}{number of repetitions in the bootstrapping procedure of the
+goodness of fit test}
+
+\item{seed}{random number generation seed for reproducibility}
+}
+\value{
+This function returns an object of class "metamix". The function
+  print summarizes the estimates and tests the model fit by comparing the
+  empirical t-distribution to a simulated bootstrap of the model-implied
+  t-distribution. The function mixplot summarizes the model-implied
+  t-distribution and overlays the empirical distribution.
 }
 \description{
 Estimate the true meta-analytical effect size corrected for publication bias.
+}
+\details{
+t-values need to be provided so that a positive t-value always means
+  the same (e.g. positive effect in the treatment condition compared to the
+  control condition)
+
+  The sample sizes are only needed to compute critical t-values, so n1 and n2
+  are interchangeable and the distinction between treatment and control group
+  does not matter.
+}
+\examples{
+# values from Table 2 in Ulrich et al. (2018)
+n1_t2 <- c(20, 30, 35, 25, 60, 40, 45, 35, 70, 65,
+30, 40, 30, 20, 90, 70, 50, 65, 50, 45)
+n2_t2 <- c(30, 35, 35, 20, 50, 40, 50, 30, 80, 60,
+25, 40, 25, 20, 80, 75, 50, 70, 50, 55)
+t_t2 <- c(.59, 1.84, 1.72, -.4, .1, .48, 1.17, 2.18, .15, 1.76,
+1.9, .5, 1.27, 1.71, 1.17, 1.91, .08, -.48, .98, 2.28)
+m_t2 <- metamix(t_t2, n1_t2, n2_t2)
+print(m_t2)
 }
