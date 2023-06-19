@@ -22,52 +22,54 @@ mixplot <- function(x){
   
   if(!any(class(x) == "metamix")) stop("x is not a metamix object")
   
+  # abbreviate
   dat <- data.frame(
     t = x$theoretical_distribution$t_values,
     published = x$theoretical_distribution$published)
+  
   # adjust the second y-axis to overlap the theoretical and empirical distributions
-  # the log adjusts for the difference in binwidth (see usage below)
-  coeff <- length(x$theoretical_distribution$t_values) *
+  # the log adjusts for the difference in binwidth (cf. usage below)
+  scale_factor <- length(x$theoretical_distribution$t_values) *
     mean(x$theoretical_distribution$published) *
     log(length(x$data$t)) /
     length(x$data$t) /
     log(length(dat$t))
     
   
-  
+  # plot creation
   gg <- ggplot2::ggplot(
     data = dat,
     mapping = ggplot2::aes(
       x = t)) +
-    ggplot2::geom_vline(
+    ggplot2::geom_vline( # natural y-axis at x = 0
       xintercept = 0,
       linetype = "dashed",
       color = "gray") +
-    ggplot2::geom_area(
+    ggplot2::geom_area( # background: all bootstrapped t-values
       ggplot2::aes(y = ggplot2::after_stat(count)), stat = "bin",
       bins = floor(10 * log(length(dat$t))),
       color = "#6c0016",
       fill = "#6c0016",
       alpha = .2) +
-    ggplot2::geom_area(
+    ggplot2::geom_area( # overlay 1: bootstrapped published t-values
       ggplot2::aes(y = ggplot2::after_stat(count)), stat = "bin",
       data = dat[dat$published, ],
       bins = floor(10 * log(length(dat$t))),
       color = "#004c6c",
       fill = "#004c6c") +
-    ggplot2::theme_classic() +
-    ggplot2::geom_histogram(
+    ggplot2::geom_histogram( # overlay 2: empirical distribution histogram outlines
       data = data.frame(
         t = rep(
           x$data$t,
-          each = coeff)),
+          each = scale_factor)),
       bins = floor(10 * log(length(x$data$t))),
       fill = NA,
       color = "black") +
-    ggplot2::scale_y_continuous(
+    ggplot2::theme_classic() +
+    ggplot2::scale_y_continuous( # double count axis
       name = "simulation count",
       sec.axis = ggplot2::sec_axis(
-        ~. / coeff,
+        ~. / scale_factor,
         name = "data count"
       ))
   

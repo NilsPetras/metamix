@@ -63,6 +63,7 @@ metamix <- function(
   set.seed(seed)
   
   # estimate the model
+  # (supplement code from Ulrich et al., 2018 without redundancies)
   if (SigOnly | nonSigOnly) {
     y <- EstimationSigOnly(
       t = t, 
@@ -143,7 +144,7 @@ EstimationSigOnly <- function(
   
   if(!is.null(n2)){
     c <- stats::qt(1 - alpha, n1 + n2 - 2)
-    nu <- n1 + n2-2
+    nu <- n1 + n2 - 2
     r <- sqrt(n1 * n2 / (n1 + n2))
   }
   

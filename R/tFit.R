@@ -19,63 +19,55 @@
 tFit <- function(
     t, n1, n2, alpha, p, d, nrep, TwoSided, SigSuppress
 ) {
-  # if n2 = NULL one sample t test
+  # still missing: if n2 = NULL one sample t test
   
-  # the non-mixture model is essentially a mixture model with p_sp = 1
-  # this is already passed on to this function by the metamix function
-  
-  tdist <- matrix(nrow = nrep, ncol = length(n1))
+  # non-mixture = mixture model with p_sp = 1 (already done in metamix)
   
   df <- n1 + n2 - 2
   
-    for (j in 1:length(n1)) {
-      tdist[ ,j] <- stats::rt(
-        nrep,
-        df[j],
-        d * sqrt(n1[j] * n2[j] / (n1[j] + n2[j]))) # see Faul et al. (2007), G-Power paper, Table 3
-    }
+  tdist <- matrix( # non-central, model implied distribution
+    nrow = nrep,
+    ncol = length(n1))
   
-  published <- matrix(
+  published <- matrix( # publication status
     stats::runif(nrep * length(n1)),
     nrow = nrep,
     ncol = length(n1))
   
-  # decision tree with 4 nodes based on:
-  # 1) are significant results suppressed? (no/yes)
-  # 2) are tests conducted two-sided? (no/yes)
-  if (!SigSuppress) {
-    if (!TwoSided) {
-      tcrit <- stats::qt(1 - alpha, df)
-        for (j in 1:length(n1)) {
-          published[tdist[,j] > tcrit[j],j] <- TRUE
-          published[tdist[,j] < tcrit[j],j] <- published[tdist[,j] < tcrit[j],j] > p
-        }
-    } else {
-      tcrit <- stats::qt(1 - alpha / 2, df)
-        for (j in 1:length(n1)) {
-          published[abs(tdist[,j]) > tcrit[j],j] <- TRUE
-          published[abs(tdist[,j]) < tcrit[j],j] <- published[abs(tdist[,j]) < tcrit[j],j] > p
-        } 
-    }
+  for (j in seq_along(n1)) { # distribution differs by sample size
+    tdist[ ,j] <- stats::rt(
+      nrep,
+      df[j],
+      d * sqrt(n1[j] * n2[j] / (n1[j] + n2[j]))) # see Faul et al. (2007), G-Power paper, Table 3
+  }
+  tdistsave <- tdist
+  
+  if (TwoSided) {
+    tcrit <- stats::qt(1 - alpha / 2, df)
+    tdist <- abs(tdist)
   } else {
-    if (!TwoSided) {
-      tcrit <- stats::qt(1 - alpha, df)
-        for (j in 1:length(n1)) {
-          published[tdist[,j] < tcrit[j],j] <- TRUE
-          published[tdist[,j] > tcrit[j],j] <- published[tdist[,j] > tcrit[j],j] > p
-        }
-    } else {
-      tcrit <- stats::qt(1 - alpha / 2, df)
-        for (j in 1:length(n1)) {
-          published[abs(tdist[,j]) < tcrit[j],j] <- TRUE
-          published[abs(tdist[,j]) > tcrit[j],j] <- published[abs(tdist[,j]) > tcrit[j],j] > p
-        }
-    }
+    tcrit <- stats::qt(1 - alpha, df)
   }
   
+  if (!SigSuppress) {
+      for (j in seq_along(n1)) {
+        # always publish significant t-values
+        published[tdist[,j] > tcrit[j],j] <- TRUE
+        # if non-significant, selective reporting check decides
+        published[tdist[,j] < tcrit[j],j] <- published[tdist[,j] < tcrit[j],j] > p
+      }
+  } else { # > and < swapped
+      for (j in seq_along(n1)) {
+        published[tdist[,j] < tcrit[j],j] <- TRUE
+        published[tdist[,j] > tcrit[j],j] <- published[tdist[,j] > tcrit[j],j] > p
+      }
+  }
   
-  ks <- stats::ks.test(t, c(tdist[as.logical(published)]))
+  # kolmogoroff smirnov test of observed and bootstrapped distributions
+  ks <- stats::ks.test(t, c(tdistsave[as.logical(published)]))
+  
+  # for print
   ks$data.name <- "t (observed) and t (model implied, bootstrap)"
   
-  return(list(ks, c(tdist), c(as.logical(published))))
+  return(list(ks, c(tdistsave), c(as.logical(published))))
 }
