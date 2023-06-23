@@ -1,15 +1,5 @@
-setMethod("print", "metamix",
-          function(x, doplot = FALSE){
-            print_metamix(x, doplot)
-          })
-
-#' Print metamix output
-#'
-#' Print a summary of the metamix estimation results
-#'
-#' @param x Object of the class "metamix" as created by the `metamix` function.
-#' @param doplot should a metamix plot be shown as well?
-print_metamix <- function(x, doplot){
+#' @export
+print.metamix <- function(x, doplot = FALSE){
   
   est <- x$estimates
   estim <- data.frame(
