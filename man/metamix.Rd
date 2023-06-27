@@ -15,7 +15,9 @@ metamix(
   TwoSided = FALSE,
   SigSuppress = FALSE,
   nrep = 1e+05,
-  seed = 42
+  seed = 42,
+  dstart = NULL,
+  pstart = NULL
 )
 }
 \arguments{
@@ -46,6 +48,10 @@ only works for one-sided t-tests.}
 goodness of fit test}
 
 \item{seed}{random number generation seed for reproducibility}
+
+\item{dstart}{vector of starting values for d}
+
+\item{pstart}{vector of starting values for p_sp}
 }
 \value{
 This function returns an object of class "metamix". The function

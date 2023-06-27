@@ -19,6 +19,8 @@
 #' @param nrep number of repetitions in the bootstrapping procedure of the
 #'   goodness of fit test
 #' @param seed random number generation seed for reproducibility
+#' @param dstart vector of starting values for d
+#' @param pstart vector of starting values for p_sp
 #'
 #' @details t-values need to be provided so that a positive t-value always means
 #'   the same (e.g. positive effect in the treatment condition compared to the
@@ -56,7 +58,9 @@ metamix <- function(
     TwoSided = FALSE, 
     SigSuppress = FALSE, 
     nrep = 1e5,
-    seed = 42) {
+    seed = 42,
+    dstart = NULL,
+    pstart = NULL) {
   
   if ((SigOnly | nonSigOnly) & TwoSided) stop("The two-sided t-test non-mixture model for significant or non-significant results reported only is currently not supported.")
   
@@ -71,7 +75,8 @@ metamix <- function(
       n2 = n2, 
       alpha = alpha, 
       ConCof = ConCof, 
-      nonSigOnly = nonSigOnly)
+      nonSigOnly = nonSigOnly,
+      dstart = dstart)
   } else {
     y <- EstimationMix(
       t = t, 
@@ -80,7 +85,9 @@ metamix <- function(
       alpha = alpha, 
       ConCof = ConCof, 
       SigSuppress = SigSuppress, 
-      TwoSided = TwoSided
+      TwoSided = TwoSided,
+      dstart = dstart,
+      pstart = pstart
     )
   }
   
@@ -128,7 +135,8 @@ EstimationSigOnly <- function(
     n1, n2, 
     alpha, 
     ConCof, 
-    nonSigOnly){
+    nonSigOnly,
+    dstart){
   
   #### Output
   # d_est: estimate of delta
@@ -138,7 +146,7 @@ EstimationSigOnly <- function(
   # p: p-value associated with X2
   
   # Starting values of d for stats::nlminb-optimization
-  dset <- c(0.6, 0.3) # removed 0 as the third starting value because it hung up estimation for example (Table 1 in Ulrich et al., 2018)
+  if (is.null(dstart)) dstart <- c(0.6, 0.3) # removed 0 as the third starting value because it hung up estimation for example (Table 1 in Ulrich et al., 2018)
   
   # Compute critical values for all studies
   
@@ -159,8 +167,8 @@ EstimationSigOnly <- function(
   
   # Convergence check with different starting values
   j <- 0
-  fval <- dmax <- rep(NA, length(dset))
-  for(d0 in dset){
+  fval <- dmax <- rep(NA, length(dstart))
+  for(d0 in dstart){
     j <- j + 1
     tmp <- stats::nlminb(d0, f)
     fval[j] <- tmp$objective
@@ -174,7 +182,7 @@ EstimationSigOnly <- function(
     cat('Check starting value \n')
     print(list(
       t = t, t.mean = mean(t), 
-      d_start = dset, 
+      d_start = dstart, 
       dmax = dmax))
     d_est = NA; SE = NA
     CI <- c(NA, NA)
@@ -201,7 +209,9 @@ EstimationMix <- function(
     alpha, 
     ConCof, 
     SigSuppress, 
-    TwoSided){
+    TwoSided,
+    dstart,
+    pstart){
   
   # mixture model, two-sample t-test
   
@@ -218,8 +228,8 @@ EstimationMix <- function(
   # pp:  p-value associated with XX2
   
   ## Define starting values of p and d for stats::nlminb
-  pstart <- c(.2, .5, .8)
-  dstart <- c(0, .2, .5)
+  if (is.null(pstart)) pstart <- c(.2, .5, .8)
+  if (is.null(dstart)) dstart <- c(0, .2, .5)
   
   ## Compute critical values for all studies;
   # r is needed to compute delta

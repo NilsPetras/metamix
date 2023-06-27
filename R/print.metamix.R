@@ -1,5 +1,5 @@
 #' @export
-print.metamix <- function(x, doplot = FALSE){
+print.metamix <- function(x, ...){
   
   est <- x$estimates
   estim <- data.frame(
@@ -34,9 +34,6 @@ print.metamix <- function(x, doplot = FALSE){
   
   # ks-test results (only changed the name of the variables)
   print(x$model_fit_test)
-  
-  # optional instant plot
-  if(doplot) mixplot(x)
   
   invisible(x)
 }

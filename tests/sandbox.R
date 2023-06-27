@@ -1,7 +1,7 @@
 rm(list = ls())
 devtools::load_all()
 
-# Sigurdson et al. (2023) data
+# Sigurdson et al. (2023) data ----
 sigurdson <- read.csv(system.file("extdata", "Sigurdson2023.csv", package = "metamix"))
 
 sigurdson <- sigurdson[1:33,c("Index", "Pln", "Trn", "t")]
@@ -46,28 +46,28 @@ m_sigurdson_twosided <- metamix(
   nrep = 1e5,
   TwoSided = TRUE)
 testplot2 <- mixplot(m_sigurdson_twosided) +
-  ggplot2::xlim(-4, 4)  +
+  ggplot2::xlim(-4, 4)  #+
   # ggplot2::ylim(0, 8e4) +
-  ggplot2::annotate(
-    "text",
-    x = 3,
-    y = 50000,
-    label = paste(
-      "p[sp] == ",
-      round(m_sigurdson_twosided$estimates$p_est, 3),
-      "(", round(m_sigurdson_twosided$estimates$CI_p[1], 3), ", ",
-      round(m_sigurdson_twosided$estimates$CI_p[2], 3), ")",
-      sep = ""),
-    parse = TRUE) +
-  ggplot2::annotate(
-    "text",
-    x = 3,
-    y = 40000,
-    label = paste(
-      "p[pub] == ",
-      round(mean(m_sigurdson_twosided$theoretical_distribution$published), 3),
-      sep = ""),
-    parse = TRUE)
+  # ggplot2::annotate(
+  #   "text",
+  #   x = 3,
+  #   y = 50000,
+  #   label = paste(
+  #     "p[sp] == ",
+  #     round(m_sigurdson_twosided$estimates$p_est, 3),
+  #     "(", round(m_sigurdson_twosided$estimates$CI_p[1], 3), ", ",
+  #     round(m_sigurdson_twosided$estimates$CI_p[2], 3), ")",
+  #     sep = ""),
+  #   parse = TRUE) +
+  # ggplot2::annotate(
+  #   "text",
+  #   x = 3,
+  #   y = 40000,
+  #   label = paste(
+  #     "p[pub] == ",
+  #     round(mean(m_sigurdson_twosided$theoretical_distribution$published), 3),
+  #     sep = ""),
+  #   parse = TRUE)
 ggplot2::ggsave("testplot2.pdf", testplot2, width = 8, height = 5)
 
 
@@ -77,7 +77,7 @@ ggplot2::ggsave("testplot2.pdf", testplot2, width = 8, height = 5)
 
 
 
-# cross-validation of software implementation and paper
+# cross-validation of software implementation and paper ----
 
 # Table 1 example in Ulrich et al. (2018) - all significant (replicates exactly)
 if(TRUE) {
@@ -89,7 +89,7 @@ if(TRUE) {
 }
 
 # Table 2 example in Ulrich et al. (2018) - mix (replicates except one minor rounding error)
-if(FALSE) {n1_t2 <- c(20, 30, 35, 25, 60, 40, 45, 35, 70, 65, 30, 40, 30, 20, 90, 70, 50, 65, 50, 45)
+if(TRUE) {n1_t2 <- c(20, 30, 35, 25, 60, 40, 45, 35, 70, 65, 30, 40, 30, 20, 90, 70, 50, 65, 50, 45)
 n2_t2 <- c(30, 35, 35, 20, 50, 40, 50, 30, 80, 60, 25, 40, 25, 20, 80, 75, 50, 70, 50, 55)
 t_t2 <- c(.59, 1.84, 1.72, -.4, .1, .48, 1.17, 2.18, .15, 1.76, 1.9, .5, 1.27, 1.71, 1.17, 1.91, .08, -.48, .98, 2.28)
 m_t2 <- metamix(t = t_t2, n1 = n1_t2, n2 = n2_t2, nrep = 1e5)}
