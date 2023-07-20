@@ -33,7 +33,7 @@ print.metamix <- function(x, ...){
   print(signif(estim, 3))
   
   # ks-test results (only changed the name of the variables)
-  print(x$model_fit_test)
+  if(!is.na(x$model_fit_test)) print(x$model_fit_test)
   
   invisible(x)
 }

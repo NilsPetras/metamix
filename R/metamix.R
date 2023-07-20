@@ -21,6 +21,8 @@
 #' @param seed random number generation seed for reproducibility
 #' @param dstart vector of starting values for d
 #' @param pstart vector of starting values for p_sp
+#' @param estimateOnly runs only the estimation and omits the bootstrapping
+#'   procedure and goodness of fit test
 #'
 #' @details t-values need to be provided so that a positive t-value always means
 #'   the same (e.g. positive effect in the treatment condition compared to the
@@ -60,7 +62,8 @@ metamix <- function(
     nrep = 1e5,
     seed = 42,
     dstart = NULL,
-    pstart = NULL) {
+    pstart = NULL,
+    estimateOnly = FALSE) {
   
   if ((SigOnly | nonSigOnly) & TwoSided) stop("The two-sided t-test non-mixture model for significant or non-significant results reported only is currently not supported.")
   
@@ -92,38 +95,58 @@ metamix <- function(
   }
   
   # bootstrap the model implied distribution and compute the ks-test
-  fit <- tFit(
-    t = t, 
-    n1 = n1, 
-    n2 = n2, 
-    alpha = alpha, 
-    p = min(y$p_est, 1),
-    d = y$d_est, 
-    nrep = nrep, 
-    TwoSided = TwoSided, 
-    SigSuppress = SigSuppress
-  )
-  
-  # format the returned object
-  output <- list(
-    data = list(
+  if(!estimateOnly) {
+    fit <- tFit(
       t = t, 
       n1 = n1, 
-      n2 = n2
-    ), 
-    model = list(
-      SigOnly = SigOnly, 
-      nonSigOnly = nonSigOnly, 
+      n2 = n2, 
       alpha = alpha, 
+      p = min(y$p_est, 1),
+      d = y$d_est, 
+      nrep = nrep, 
       TwoSided = TwoSided, 
-      SigSuppress = SigSuppress), 
-    estimates = y, 
-    model_fit_test = fit[[1]], 
-    theoretical_distribution = list(
-      t_values = fit[[2]], 
-      published = fit[[3]]
+      SigSuppress = SigSuppress
     )
-  )
+  }
+  
+  # format the returned object
+  if (estimateOnly) {
+    output <- list(
+      data = list(
+        t = t, 
+        n1 = n1, 
+        n2 = n2), 
+      model = list(
+        SigOnly = SigOnly, 
+        nonSigOnly = nonSigOnly, 
+        alpha = alpha, 
+        TwoSided = TwoSided, 
+        SigSuppress = SigSuppress), 
+      estimates = y, 
+      model_fit_test = NA, 
+      theoretical_distribution = list(
+        t_values = NA, 
+        published = NA)
+    )
+  } else {
+    output <- list(
+      data = list(
+        t = t, 
+        n1 = n1, 
+        n2 = n2), 
+      model = list(
+        SigOnly = SigOnly, 
+        nonSigOnly = nonSigOnly, 
+        alpha = alpha, 
+        TwoSided = TwoSided, 
+        SigSuppress = SigSuppress), 
+      estimates = y, 
+      model_fit_test = fit[[1]], 
+      theoretical_distribution = list(
+        t_values = fit[[2]], 
+        published = fit[[3]])
+    )
+  }
   
   class(output) <- "metamix"
   
@@ -311,7 +334,12 @@ EstimationMix <- function(
   y <- stats::nlminb(d_est, f0)$par
   XX2 <- -2 * (LogLikeMixP0(y, t, nu, r) -
                  LogLikeMix(d_est, log(p_est / (1 - p_est)), t, nu, r, c, SigSuppress, TwoSided))
-  pp <- 1 - stats::pchisq(abs(XX2), 1)
+  pp <- (1 - stats::pchisq(abs(XX2), 1)) / 2
+  # the halving of the p-value for p_sp is based on the
+  # null hypothesis being at the boundary of the parameter
+  # space. In this situation, the true Chi-Square distribution
+  # is a mixture of two distributions with df = 1 and df = 0
+  # where the density of the df = 0 one is completely at 0
   
   return(list(
     d_est = d_est, SE_d = SE_d, CI_d = CI_d, 

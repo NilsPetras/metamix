@@ -67,10 +67,10 @@ mixplot <- function(x){
       color = "black") +
     ggplot2::theme_classic() +
     ggplot2::scale_y_continuous( # double count axis
-      name = "simulation count",
+      name = "Simulation Count",
       sec.axis = ggplot2::sec_axis(
         ~. / scale_factor,
-        name = "data count"
+        name = "Data Count"
       ))
   
   return(gg)
