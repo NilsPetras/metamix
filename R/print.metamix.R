@@ -8,10 +8,18 @@ print.metamix <- function(x, ...){
     ci.lower = c(est$CI_d[1]),
     ci.upper = c(est$CI_d[2]),
     chisq = c(est$X2),
+    df = 1,
     p.value = c(est$p))
   # in the mixture model there is a p_sp estimate
   if(!(x$model$SigOnly | x$model$nonSigOnly)){
-    estim[2, ] <- c(est$p_est, est$SE_p, est$CI_p[1], est$CI_p[2], est$XX2, est$pp)
+    estim[2, ] <- c(
+      est$p_est,
+      est$SE_p,
+      est$CI_p[1],
+      est$CI_p[2],
+      est$XX2,
+      NA,
+      est$pp)
     row.names(estim)[2] <- "p_sp"
   }
   
@@ -32,8 +40,12 @@ print.metamix <- function(x, ...){
   # estimates: estimates as data frame
   print(signif(estim, 3))
   
-  # ks-test results (only changed the name of the variables)
-  if(!is.na(x$model_fit_test)) print(x$model_fit_test)
+  # ks-test results if available (only changed the name of the variables)
+  if(isTRUE(all.equal(
+    class(x$model_fit_test),
+    c("ks.test", "htest")))){
+    print(x$model_fit_test)
+  }
   
   invisible(x)
 }
