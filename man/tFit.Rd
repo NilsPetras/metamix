@@ -4,7 +4,7 @@
 \alias{tFit}
 \title{t Fit}
 \usage{
-tFit(t, n1, n2, alpha, p, d, nrep, TwoSided, SigSuppress)
+tFit(t, n1, n2, alpha, p, d, nrep, ConCof, TwoSided, SigSuppress)
 }
 \arguments{
 \item{t}{observed t-values}
@@ -21,6 +21,9 @@ tFit(t, n1, n2, alpha, p, d, nrep, TwoSided, SigSuppress)
 
 \item{nrep}{number of bootstrap repetitions (total number will be nrep *
 length(n1))}
+
+\item{ConCof}{confidence coefficient for calculating the confidence interval;
+.95 corresponds to a 95\% CI}
 
 \item{TwoSided}{assumption: were the observed t-tests two-sided?}
 

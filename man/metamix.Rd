@@ -14,7 +14,7 @@ metamix(
   ConCof = 0.95,
   TwoSided = FALSE,
   SigSuppress = FALSE,
-  nrep = 1e+05,
+  nrep = 10000,
   seed = 42,
   dstart = NULL,
   pstart = NULL,
@@ -76,7 +76,7 @@ t-values need to be provided so that a positive t-value always means
   are interchangeable and the distinction between treatment and control group
   does not matter.+
 
-  The bootstrap is trimmed to an equal number of published repetitions per
+  The bootstrap is trimmed to `nrep` published repetitions per
   study, so that each study gets equal weight in the model-implied
   distribution of published studies. The number of unpublished repetitions
   per study can vary.

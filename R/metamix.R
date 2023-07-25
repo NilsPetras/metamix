@@ -32,7 +32,7 @@
 #'   are interchangeable and the distinction between treatment and control group
 #'   does not matter.+
 #'
-#'   The bootstrap is trimmed to an equal number of published repetitions per
+#'   The bootstrap is trimmed to `nrep` published repetitions per
 #'   study, so that each study gets equal weight in the model-implied
 #'   distribution of published studies. The number of unpublished repetitions
 #'   per study can vary.
@@ -64,7 +64,7 @@ metamix <- function(
     ConCof = .95, 
     TwoSided = FALSE, 
     SigSuppress = FALSE, 
-    nrep = 1e5,
+    nrep = 1e4,
     seed = 42,
     dstart = NULL,
     pstart = NULL,
@@ -108,7 +108,8 @@ metamix <- function(
       alpha = alpha, 
       p = min(y$p_est, 1),
       d = y$d_est, 
-      nrep = nrep, 
+      nrep = nrep,
+      ConCof = ConCof,
       TwoSided = TwoSided, 
       SigSuppress = SigSuppress
     )
@@ -152,8 +153,7 @@ metamix <- function(
       model_fit_test = fit[[1]], 
       theoretical_distribution = list(
         t_values = fit[[2]], 
-        published = fit[[3]],
-        effective_size = fit[[4]])
+        published = fit[[3]])
     )
   }
   

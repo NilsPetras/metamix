@@ -29,8 +29,7 @@ mixplot <- function(x){
   
   # adjust the second y-axis to overlap the theoretical and empirical distributions
   # the log adjusts for the difference in binwidth (cf. usage below)
-  scale_factor <- length(dat$t) *
-    mean(dat$published) *
+  scale_factor <- sum(dat$published) *
     log(length(x$data$t)) /
     length(x$data$t) /
     log(length(dat$t))
