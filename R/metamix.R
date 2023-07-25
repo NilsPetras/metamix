@@ -16,8 +16,8 @@
 #' @param SigSuppress if both significant and non-significant study results
 #'   entered the meta-analysis, were significant results suppressed? Currently
 #'   only works for one-sided t-tests.
-#' @param nrep number of repetitions in the bootstrapping procedure of the
-#'   goodness of fit test
+#' @param nrep number of repetitions in the bootstrap from the model-implied
+#'   distribution of t-values
 #' @param seed random number generation seed for reproducibility
 #' @param dstart vector of starting values for d
 #' @param pstart vector of starting values for p_sp
@@ -30,7 +30,12 @@
 #'
 #'   The sample sizes are only needed to compute critical t-values, so n1 and n2
 #'   are interchangeable and the distinction between treatment and control group
-#'   does not matter.
+#'   does not matter.+
+#'
+#'   The bootstrap is trimmed to an equal number of published repetitions per
+#'   study, so that each study gets equal weight in the model-implied
+#'   distribution of published studies. The number of unpublished repetitions
+#'   per study can vary.
 #'
 #' @return This function returns an object of class "metamix". The function
 #'   print summarizes the estimates and tests the model fit by comparing the
@@ -121,12 +126,14 @@ metamix <- function(
         nonSigOnly = nonSigOnly, 
         alpha = alpha, 
         TwoSided = TwoSided, 
-        SigSuppress = SigSuppress), 
+        SigSuppress = SigSuppress,
+        nrep = NA), 
       estimates = y, 
       model_fit_test = NA, 
       theoretical_distribution = list(
         t_values = NA, 
-        published = NA)
+        published = NA,
+        effective_size = NA)
     )
   } else {
     output <- list(
@@ -139,12 +146,14 @@ metamix <- function(
         nonSigOnly = nonSigOnly, 
         alpha = alpha, 
         TwoSided = TwoSided, 
-        SigSuppress = SigSuppress), 
+        SigSuppress = SigSuppress,
+        nrep = nrep), 
       estimates = y, 
       model_fit_test = fit[[1]], 
       theoretical_distribution = list(
         t_values = fit[[2]], 
-        published = fit[[3]])
+        published = fit[[3]],
+        effective_size = fit[[4]])
     )
   }
   

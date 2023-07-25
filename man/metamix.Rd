@@ -17,7 +17,8 @@ metamix(
   nrep = 1e+05,
   seed = 42,
   dstart = NULL,
-  pstart = NULL
+  pstart = NULL,
+  estimateOnly = FALSE
 )
 }
 \arguments{
@@ -44,14 +45,17 @@ for non-mixture models.}
 entered the meta-analysis, were significant results suppressed? Currently
 only works for one-sided t-tests.}
 
-\item{nrep}{number of repetitions in the bootstrapping procedure of the
-goodness of fit test}
+\item{nrep}{number of repetitions in the bootstrap from the model-implied
+distribution of t-values}
 
 \item{seed}{random number generation seed for reproducibility}
 
 \item{dstart}{vector of starting values for d}
 
 \item{pstart}{vector of starting values for p_sp}
+
+\item{estimateOnly}{runs only the estimation and omits the bootstrapping
+procedure and goodness of fit test}
 }
 \value{
 This function returns an object of class "metamix". The function
@@ -70,7 +74,12 @@ t-values need to be provided so that a positive t-value always means
 
   The sample sizes are only needed to compute critical t-values, so n1 and n2
   are interchangeable and the distinction between treatment and control group
-  does not matter.
+  does not matter.+
+
+  The bootstrap is trimmed to an equal number of published repetitions per
+  study, so that each study gets equal weight in the model-implied
+  distribution of published studies. The number of unpublished repetitions
+  per study can vary.
 }
 \examples{
 # values from Table 2 in Ulrich et al. (2018)

@@ -24,13 +24,13 @@ mixplot <- function(x){
   
   # abbreviate
   dat <- data.frame(
-    t = x$theoretical_distribution$t_values,
-    published = x$theoretical_distribution$published)
+    t = stats::na.omit(c(x$theoretical_distribution$t_values)),
+    published = stats::na.omit(c(x$theoretical_distribution$published)))
   
   # adjust the second y-axis to overlap the theoretical and empirical distributions
   # the log adjusts for the difference in binwidth (cf. usage below)
-  scale_factor <- length(x$theoretical_distribution$t_values) *
-    mean(x$theoretical_distribution$published) *
+  scale_factor <- length(dat$t) *
+    mean(dat$published) *
     log(length(x$data$t)) /
     length(x$data$t) /
     log(length(dat$t))

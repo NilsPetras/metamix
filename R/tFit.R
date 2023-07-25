@@ -22,19 +22,23 @@ tFit <- function(
   # still missing: if n2 = NULL one sample t test
   
   # non-mixture = mixture model with p_sp = 1 (already done in metamix)
-  
+  k <- length(n1)
   df <- n1 + n2 - 2
   
   tdist <- matrix( # non-central, model implied distribution
     nrow = nrep,
-    ncol = length(n1))
+    ncol = k)
   
   published <- matrix( # publication status
-    stats::runif(nrep * length(n1)),
+    stats::runif(nrep * k),
     nrow = nrep,
-    ncol = length(n1))
+    ncol = k)
   
-  for (j in seq_along(n1)) { # distribution differs by sample size
+  counter <- matrix(
+    nrow = nrep,
+    ncol = k)
+  
+  for (j in 1:k) { # distribution differs by sample size
     tdist[ ,j] <- stats::rt(
       nrep,
       df[j],
@@ -50,24 +54,40 @@ tFit <- function(
   }
   
   if (!SigSuppress) {
-      for (j in seq_along(n1)) {
+      for (j in 1:k) {
         # always publish significant t-values
         published[tdist[,j] > tcrit[j],j] <- TRUE
         # if non-significant, selective reporting check decides
         published[tdist[,j] < tcrit[j],j] <- published[tdist[,j] < tcrit[j],j] > p
       }
   } else { # > and < swapped
-      for (j in seq_along(n1)) {
+      for (j in 1:k) {
         published[tdist[,j] < tcrit[j],j] <- TRUE
         published[tdist[,j] > tcrit[j],j] <- published[tdist[,j] > tcrit[j],j] > p
       }
   }
+  published <- matrix(as.logical(published), ncol = k)
+  
+  # trim to an equal number of published repetitions per sample size combination
+  for (j in 1:k) {
+    counter[published[ ,j],j] <- 1:sum(published[ ,j])
+  }
+  
+  cutlength <- min(colSums(published))
+  cutoff <- apply(counter, 2, function(x) {
+    which(x == cutlength)
+  })
+  
+  for (j in 1:k) {
+    tdistsave[(cutoff[j] + 1):nrep,j] <- NA
+    published[(cutoff[j] + 1):nrep,j] <- NA
+  }
   
   # kolmogoroff smirnov test of observed and bootstrapped distributions
-  ks <- stats::ks.test(t, c(tdistsave[as.logical(published)]))
+  ks <- stats::ks.test(t, c(tdistsave[published]))
   
   # for print
   ks$data.name <- "t (observed) and t (model implied, bootstrap)"
   
-  return(list(ks, c(tdistsave), c(as.logical(published))))
+  return(list(ks, tdistsave, published, cutlength))
 }

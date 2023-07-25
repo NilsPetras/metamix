@@ -44,7 +44,21 @@ print.metamix <- function(x, ...){
   if(isTRUE(all.equal(
     class(x$model_fit_test),
     c("ks.test", "htest")))){
+    lengths <- apply(
+      x$theoretical_distribution$t_values,
+      2,
+      function(x) length(stats::na.omit(x)))
+    lengthdiff <- max(lengths) / min(lengths)
+    
     print(x$model_fit_test)
+    cat(
+      "Bootstrap: The effective sample size per study (number of published repetitions) is",
+      x$theoretical_distribution$effective_size,
+      "based on a total of",
+      x$model$nrep,
+      "repetitions. The relative length of the longest and shortest case (including unpublished repetitions) is",
+      round(lengthdiff, 2)
+      )
   }
   
   invisible(x)
