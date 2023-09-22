@@ -1,6 +1,6 @@
 Package: metamix
 Type: Package
-Title: Correct meta-analytic effect estimates for publication bias
+Title: Meta-analytic effect estimates adjusted for selective publishing conditional on significance
 Version: 0.1.0
 Authors@R: c(
     person("Nils", "Petras", email = "nils.petras@mailbox.org",
